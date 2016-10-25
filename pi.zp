@@ -1,0 +1,45 @@
+(define ready [])
+
+(define (ex)
+  (if (not (null? ready))
+    (let ((cont (head ready)))
+      (begin
+        (set! ready (tail ready))
+        (cont '())))))
+
+(define (fork fn . args)
+  (set! ready (++ ready ($ (begin (apply fn args) (ex))))))
+
+(define (yield)
+  (call-with-current-continuation
+   (lambda (c)
+     (begin
+       (set! ready (++ ready c))
+       (let ((cc (head ready)))
+         (begin
+           (set! ready (tail ready))
+           (cc '())))))))
+
+(define-struct chan (contents))
+(defimpl stringify chan:chan?
+         ((->string ($ (++ "<Channel: " (->string (chan:get-contents %)) ">")))))
+
+(define (chan:empty)
+  (chan:make-chan []))
+
+(define-syntax chan:take
+  (syntax-rules ()
+    ((chan:take chan)
+      (let ((c (chan:get-contents chan)))
+        (if (null? c)
+          (begin
+            (yield)
+            (eval (macro-expand (list 'chan:take 'chan))))
+          (begin
+            (set! chan (chan:make-chan (tail c)))
+            (head c)))))))
+
+(define-syntax chan:put
+  (syntax-rules ()
+    ((chan:put chan elem)
+      (set! chan (chan:make-chan (++ (chan:get-contents chan) elem))))))
