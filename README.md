@@ -2,7 +2,7 @@
 
 Greenthreading in zepto with channels.
 
-It is extremely primitive and small (45 LOC in total).
+It is extremely primitive and small (42 LOC in total).
 
 ## Installation
 ```

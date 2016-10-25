@@ -15,10 +15,7 @@
    (lambda (c)
      (begin
        (set! ready (++ ready c))
-       (let ((cc (head ready)))
-         (begin
-           (set! ready (tail ready))
-           (cc '())))))))
+       (ex)))))
 
 (define-struct chan (contents))
 (defimpl stringify chan:chan?
