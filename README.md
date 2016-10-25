@@ -28,7 +28,7 @@ until it can provide a value.
 Let's dive into an example.
 
 ```clojure
-(define channel (chan:empty)
+(define channel (chan:empty))
 
 (fork (lambda ()
         (begin
@@ -37,11 +37,11 @@ Let's dive into an example.
 (fork (lambda ()
         (begin
           (write "second thread")
-          (channel:put "Hello, I will be printed"))))
+          (chan:put channel "Hello, I will be printed"))))
 (fork (lambda ()
         (begin
           (write "third thread")
-          (channel:put "Noone will take me :(")))))
+          (chan:put channel "Noone will take me :("))))
 (yield)
 ```
 
