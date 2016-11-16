@@ -1,0 +1,14 @@
+(define channel (chan:empty))
+(define channel2 (chan:empty))
+
+(fork
+  (lambda ()
+    (for 2
+      ((chan:select
+        (channel (lambda (x) (write x)))
+        (channel2 (lambda (x) (write x))))))))
+
+(fork (lambda () (chan:put channel2 "hello")))
+(fork (lambda () (chan:put channel  "world")))
+
+(yield)

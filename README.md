@@ -59,6 +59,27 @@ will not be taken and so will be swallowed when the program terminates.
 The call to `yield` at the end ensures the main thread gives up control
 flow.
 
+There is also a `chan:select` statement that will query a collection
+of channels and take from the first channel that contains data.
+
+```clojure
+(define channel  (chan:empty))
+(define channel2 (chan:empty))
+
+(fork (lambda ()
+        (chan:select
+          (channel
+            ($ (write %)))
+          (channel2
+            ($ (write "And now for something completely different!"))))))
+
+(fork (lambda () (chan:put channel2 "hello there")))
+(yield)
+```
+
+This will select the second channel (as there is data in there), take
+data from it, completely ignore it, and write `And now for something completely different!` to the standard output.
+
 ## How?
 
 The magic of continuations as values and mutable global data (_yuck_).

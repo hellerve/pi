@@ -40,3 +40,31 @@
   (syntax-rules ()
     ((chan:put chan elem)
       (set! chan (chan:make-chan (++ (chan:get-contents chan) elem))))))
+
+(define-syntax chan:select
+  (syntax-rules ()
+    ((chan:select (chan body))
+      (body (chan:take chan)))
+    ((chan:select "internal" bodies (chan body))
+      (let ((c (chan:get-contents chan)))
+        (if (null? c)
+          (begin
+            (yield)
+            (eval (macro-expand (cons 'chan:select 'bodies))))
+          (begin
+            (set! chan (chan:make-chan (tail c)))
+            (body (head c))))))
+    ((chan:select "internal" bodies (chan body) alt ...)
+      (let ((c (chan:get-contents chan)))
+        (if (null? c)
+          (chan:select "internal" bodies alt ...)
+          (begin
+            (set! chan (chan:make-chan (tail c)))
+            (body (head c))))))
+    ((chan:select (chan body) alt ...)
+      (let ((c (chan:get-contents chan)))
+        (if (null? c)
+          (chan:select "internal" ((chan body) alt ...) alt ...)
+          (begin
+            (set! chan (chan:make-chan (tail c)))
+            (body (head c))))))))
